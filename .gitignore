@@ -8,22 +8,16 @@
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go build command
+# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
 # Go workspace file
 go.work
-go.work.sum
 
 # Dependency directories
 vendor/
-bin/
 
-# Environment files
-.env
-.env.local
-
-# IDE
+# IDEs
 .vscode/
 .idea/
 .*/
@@ -36,10 +30,27 @@ bin/
 .DS_Store
 Thumbs.db
 
-# Test coverage
-coverage.out
+# Environment variables
+.env
+.env.local
+
+# Build output
+/gophermart
+/cmd/gophermart/gophermart
+/bin/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage
 coverage.html
-*.cover
+coverage.out
+coverage.txt
+
+# Logs
+*.log
 
 # Temporary files
 tmp/

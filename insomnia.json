@@ -1,0 +1,206 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2025-12-09T00:00:00.000Z",
+	"__export_source": "insomnia.desktop.app:v2023.5.8",
+	"resources": [
+		{
+			"_id": "req_register",
+			"parentId": "fld_user_auth",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"url": "{{ _.base_url }}/api/user/register",
+			"name": "Register User",
+			"description": "Регистрация нового пользователя. Возвращает JWT токен в заголовке Authorization и в cookie.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"login\": \"user@example.com\",\n\t\"password\": \"securePassword123\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702080000000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_login",
+			"parentId": "fld_user_auth",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"url": "{{ _.base_url }}/api/user/login",
+			"name": "Login User",
+			"description": "Вход пользователя. Возвращает JWT токен в заголовке Authorization и в cookie.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"login\": \"user@example.com\",\n\t\"password\": \"securePassword123\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702079000000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_get_balance",
+			"parentId": "fld_user_protected",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"url": "{{ _.base_url }}/api/user/balance",
+			"name": "Get User Balance",
+			"description": "Получение баланса пользователя. Требует JWT токен в заголовке Authorization или в cookie.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}",
+					"description": "JWT токен (можно использовать переменную или cookie)"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702078000000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_user_auth",
+			"parentId": "wrk_gofermart",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Authentication",
+			"description": "Эндпоинты для регистрации и авторизации",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1702080000000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "fld_user_protected",
+			"parentId": "wrk_gofermart",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Protected Routes",
+			"description": "Защищённые эндпоинты (требуют JWT токен)",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1702079000000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "wrk_gofermart",
+			"parentId": null,
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Gofermart API",
+			"description": "API для системы лояльности Gofermart",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_base",
+			"parentId": "wrk_gofermart",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Base Environment",
+			"data": {
+				"base_url": "http://localhost:8080",
+				"jwt_token": ""
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"base_url",
+					"jwt_token"
+				]
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1702080000000,
+			"_type": "environment"
+		},
+		{
+			"_id": "env_dev",
+			"parentId": "env_base",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Development",
+			"data": {
+				"base_url": "http://localhost:8080",
+				"jwt_token": ""
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"base_url",
+					"jwt_token"
+				]
+			},
+			"color": "#7d69cb",
+			"isPrivate": false,
+			"metaSortKey": 1702080000000,
+			"_type": "environment"
+		},
+		{
+			"_id": "env_docker",
+			"parentId": "env_base",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Docker",
+			"data": {
+				"base_url": "http://localhost:8080",
+				"jwt_token": ""
+			},
+			"dataPropertyOrder": {
+				"&": [
+					"base_url",
+					"jwt_token"
+				]
+			},
+			"color": "#2e7d32",
+			"isPrivate": false,
+			"metaSortKey": 1702081000000,
+			"_type": "environment"
+		},
+		{
+			"_id": "cookie_jar",
+			"parentId": "wrk_gofermart",
+			"modified": 1702080000000,
+			"created": 1702080000000,
+			"name": "Default Jar",
+			"cookies": [],
+			"_type": "cookie_jar"
+		}
+	]
+}
+
