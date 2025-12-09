@@ -93,17 +93,17 @@ func TestUserServiceImpl_Register(t *testing.T) {
 				return
 			}
 
-		// Проверки для успешной регистрации
-		if user == nil {
-			t.Error("Register() returned nil user")
-			return
-		}
-		if user.Login != tt.login {
-			t.Errorf("Register() user.Login = %v, want %v", user.Login, tt.login)
-		}
-		if token == "" {
-			t.Error("Register() returned empty token")
-		}
+			// Проверки для успешной регистрации
+			if user == nil {
+				t.Error("Register() returned nil user")
+				return
+			}
+			if user.Login != tt.login {
+				t.Errorf("Register() user.Login = %v, want %v", user.Login, tt.login)
+			}
+			if token == "" {
+				t.Error("Register() returned empty token")
+			}
 		})
 	}
 }
