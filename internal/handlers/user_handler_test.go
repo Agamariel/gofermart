@@ -137,7 +137,9 @@ func TestUserHandler_Register(t *testing.T) {
 			}
 
 			if tt.checkCookie {
-				cookies := rec.Result().Cookies()
+				res := rec.Result()
+				defer res.Body.Close()
+				cookies := res.Cookies()
 				found := false
 				for _, cookie := range cookies {
 					if cookie.Name == "Authorization" {
@@ -249,7 +251,9 @@ func TestUserHandler_Login(t *testing.T) {
 			}
 
 			if tt.checkCookie {
-				cookies := rec.Result().Cookies()
+				res := rec.Result()
+				defer res.Body.Close()
+				cookies := res.Cookies()
 				found := false
 				for _, cookie := range cookies {
 					if cookie.Name == "Authorization" {
@@ -375,7 +379,9 @@ func TestSetAuthToken(t *testing.T) {
 	setAuthToken(c, token)
 
 	// Проверяем cookie
-	cookies := rec.Result().Cookies()
+	res := rec.Result()
+	defer res.Body.Close()
+	cookies := res.Cookies()
 	var authCookie *http.Cookie
 	for _, cookie := range cookies {
 		if cookie.Name == "Authorization" {
