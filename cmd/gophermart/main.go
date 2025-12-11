@@ -55,7 +55,7 @@ func main() {
 	log.Println("Successfully connected to database")
 
 	userStorage := storage.NewPostgresUserStorage(dbPool)
-	userService := services.NewUserService(userStorage, cfg.JWTSecret, cfg.TokenExpiration.String())
+	userService := services.NewUserService(userStorage, cfg.JWTSecret, cfg.TokenExpiration)
 	userHandler := handlers.NewUserHandler(userService)
 
 	orderStorage := storage.NewPostgresOrderStorage(dbPool)

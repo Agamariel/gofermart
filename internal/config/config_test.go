@@ -11,7 +11,7 @@ func TestLoad(t *testing.T) {
 	// Сохраняем оригинальные значения для восстановления
 	originalArgs := os.Args
 	originalEnv := make(map[string]string)
-	envVars := []string{"RUN_ADDRESS", "DATABASE_URI", "ACCRUAL_SYSTEM_ADDRESS", "JWT_SECRET"}
+	envVars := []string{"RUN_ADDRESS", "DATABASE_URI", "ACCRUAL_SYSTEM_ADDRESS", "JWT_SECRET", "TOKEN_EXPIRATION"}
 	for _, key := range envVars {
 		originalEnv[key] = os.Getenv(key)
 	}
@@ -51,13 +51,13 @@ func TestLoad(t *testing.T) {
 		},
 		{
 			name:         "flags only",
-			args:         []string{"cmd", "-a", "localhost:9090", "-d", "postgresql://db", "-r", "http://accrual"},
+			args:         []string{"cmd", "-a", "localhost:9090", "-d", "postgresql://db", "-r", "http://accrual", "-t", "36h"},
 			envVars:      map[string]string{},
 			wantAddress:  "localhost:9090",
 			wantDBURI:    "postgresql://db",
 			wantAccrual:  "http://accrual",
 			wantSecret:   "default-secret-change-in-production",
-			wantTokenExp: 24 * time.Hour,
+			wantTokenExp: 36 * time.Hour,
 		},
 		{
 			name: "env only",
@@ -67,26 +67,28 @@ func TestLoad(t *testing.T) {
 				"DATABASE_URI":           "postgresql://envdb",
 				"ACCRUAL_SYSTEM_ADDRESS": "http://envaccrual",
 				"JWT_SECRET":             "env-secret",
+				"TOKEN_EXPIRATION":       "48h",
 			},
 			wantAddress:  "localhost:7070",
 			wantDBURI:    "postgresql://envdb",
 			wantAccrual:  "http://envaccrual",
 			wantSecret:   "env-secret",
-			wantTokenExp: 24 * time.Hour,
+			wantTokenExp: 48 * time.Hour,
 		},
 		{
 			name: "env overrides flags",
-			args: []string{"cmd", "-a", "localhost:9090", "-d", "postgresql://flagdb", "-r", "http://flagaccrual"},
+			args: []string{"cmd", "-a", "localhost:9090", "-d", "postgresql://flagdb", "-r", "http://flagaccrual", "-t", "72h"},
 			envVars: map[string]string{
 				"RUN_ADDRESS":            "localhost:7070",
 				"DATABASE_URI":           "postgresql://envdb",
 				"ACCRUAL_SYSTEM_ADDRESS": "http://envaccrual",
+				"TOKEN_EXPIRATION":       "12h",
 			},
 			wantAddress:  "localhost:7070",
 			wantDBURI:    "postgresql://envdb",
 			wantAccrual:  "http://envaccrual",
 			wantSecret:   "default-secret-change-in-production",
-			wantTokenExp: 24 * time.Hour,
+			wantTokenExp: 12 * time.Hour,
 		},
 		{
 			name: "partial env",
@@ -99,6 +101,18 @@ func TestLoad(t *testing.T) {
 			wantDBURI:    "postgresql://flagdb",
 			wantAccrual:  "",
 			wantSecret:   "custom-secret",
+			wantTokenExp: 24 * time.Hour,
+		},
+		{
+			name: "invalid token expiration env fallback",
+			args: []string{"cmd"},
+			envVars: map[string]string{
+				"TOKEN_EXPIRATION": "invalid",
+			},
+			wantAddress:  "localhost:8080",
+			wantDBURI:    "",
+			wantAccrual:  "",
+			wantSecret:   "default-secret-change-in-production",
 			wantTokenExp: 24 * time.Hour,
 		},
 	}
@@ -146,7 +160,7 @@ func TestLoad(t *testing.T) {
 
 func TestConfigDefaults(t *testing.T) {
 	// Очищаем env
-	envVars := []string{"RUN_ADDRESS", "DATABASE_URI", "ACCRUAL_SYSTEM_ADDRESS", "JWT_SECRET"}
+	envVars := []string{"RUN_ADDRESS", "DATABASE_URI", "ACCRUAL_SYSTEM_ADDRESS", "JWT_SECRET", "TOKEN_EXPIRATION"}
 	originalEnv := make(map[string]string)
 	for _, key := range envVars {
 		originalEnv[key] = os.Getenv(key)

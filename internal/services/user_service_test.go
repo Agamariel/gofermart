@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/agamariel/gofermart/internal/models"
 	"github.com/agamariel/gofermart/internal/storage"
@@ -77,7 +78,7 @@ func TestUserServiceImpl_Register(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewUserService(tt.mockStorage, secret, "24h")
+			service := NewUserService(tt.mockStorage, secret, 24*time.Hour)
 
 			user, token, err := service.Register(ctx, tt.login, tt.password)
 
@@ -196,7 +197,7 @@ func TestUserServiceImpl_Login(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewUserService(tt.mockStorage, secret, "24h")
+			service := NewUserService(tt.mockStorage, secret, 24*time.Hour)
 
 			user, token, err := service.Login(ctx, tt.login, tt.password)
 
@@ -295,7 +296,7 @@ func TestUserServiceImpl_GetBalance(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewUserService(tt.mockStorage, secret, "24h")
+			service := NewUserService(tt.mockStorage, secret, 24*time.Hour)
 
 			balance, err := service.GetBalance(ctx, tt.userID)
 
@@ -335,7 +336,7 @@ func TestUserServiceImpl_RegisterHashesPassword(t *testing.T) {
 		},
 	}
 
-	service := NewUserService(mockStorage, secret, "24h")
+	service := NewUserService(mockStorage, secret, 24*time.Hour)
 	_, _, err := service.Register(ctx, "test@example.com", password)
 	if err != nil {
 		t.Fatalf("Register() error = %v", err)

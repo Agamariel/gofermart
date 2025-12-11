@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/agamariel/gofermart/internal/auth"
 	"github.com/agamariel/gofermart/internal/models"
@@ -27,11 +28,11 @@ type UserService interface {
 type UserServiceImpl struct {
 	userStorage     storage.UserStorage
 	jwtSecret       string
-	tokenExpiration string
+	tokenExpiration time.Duration
 }
 
 // NewUserService создаёт новый экземпляр UserService.
-func NewUserService(userStorage storage.UserStorage, jwtSecret string, tokenExpiration string) *UserServiceImpl {
+func NewUserService(userStorage storage.UserStorage, jwtSecret string, tokenExpiration time.Duration) *UserServiceImpl {
 	return &UserServiceImpl{
 		userStorage:     userStorage,
 		jwtSecret:       jwtSecret,
@@ -120,8 +121,11 @@ func (s *UserServiceImpl) GetBalance(ctx context.Context, userID uuid.UUID) (*mo
 
 // generateToken генерирует JWT токен для пользователя.
 func (s *UserServiceImpl) generateToken(user *models.User) (string, error) {
-	// Используем 24 часа как время жизни токена
-	token, err := auth.GenerateToken(user, s.jwtSecret, 24*3600*1000000000)
+	exp := s.tokenExpiration
+	if exp <= 0 {
+		exp = 24 * time.Hour
+	}
+	token, err := auth.GenerateToken(user, s.jwtSecret, exp)
 	if err != nil {
 		return "", err
 	}
