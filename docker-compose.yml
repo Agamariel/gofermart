@@ -29,14 +29,29 @@ services:
       DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/gofermart?sslmode=disable"
       RUN_ADDRESS: "0.0.0.0:8080"
       JWT_SECRET: "dev-secret-key-change-in-production"
+      ACCRUAL_SYSTEM_ADDRESS: "http://accrual:8080"
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      accrual:
+        condition: service_started
     networks:
       - gofermart-network
     restart: unless-stopped
+
+  accrual:
+    image: debian:bookworm-slim
+    container_name: gofermart-accrual
+    working_dir: /app
+    volumes:
+      - ./cmd/accrual:/app
+    command: ["/bin/sh", "-c", "chmod +x /app/accrual_linux_amd64 && /app/accrual_linux_amd64"]
+    expose:
+      - "8080"
+    networks:
+      - gofermart-network
 
 volumes:
   postgres_data:
