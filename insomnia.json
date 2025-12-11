@@ -96,6 +96,71 @@
 			"_type": "request"
 		},
 		{
+			"_id": "req_submit_order",
+			"parentId": "fld_user_protected",
+			"modified": 1702081000000,
+			"created": 1702081000000,
+			"url": "{{ _.base_url }}/api/user/orders",
+			"name": "Submit Order",
+			"description": "Загрузка номера заказа. Требует JWT (cookie или header).\nКоды ответов: 202 (новый), 200 (уже у пользователя), 409 (другой пользователь), 422 (Луна), 400 (пустое тело).",
+			"method": "POST",
+			"body": {
+				"mimeType": "text/plain",
+				"text": "79927398713"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "text/plain"
+				},
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}",
+					"description": "Опционально, если не используете cookie"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702077500000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_get_orders",
+			"parentId": "fld_user_protected",
+			"modified": 1702081000000,
+			"created": 1702081000000,
+			"url": "{{ _.base_url }}/api/user/orders",
+			"name": "Get Orders",
+			"description": "Список заказов пользователя (новые сверху). Требует JWT. Коды: 200 / 204 / 401 / 500.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}",
+					"description": "Опционально, если не используете cookie"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702077400000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
 			"_id": "fld_user_auth",
 			"parentId": "wrk_gofermart",
 			"modified": 1702080000000,

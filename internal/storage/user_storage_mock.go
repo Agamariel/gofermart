@@ -8,7 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// MockUserStorage - мок для тестирования (экспортируемый для использования в других пакетах)
+// MockUserStorage - мок для тестирования
 type MockUserStorage struct {
 	CreateFunc        func(ctx context.Context, user *models.User) error
 	GetByLoginFunc    func(ctx context.Context, login string) (*models.User, error)
@@ -51,4 +51,3 @@ func (m *MockUserStorage) Withdraw(ctx context.Context, id uuid.UUID, amount dec
 	}
 	return nil
 }
-

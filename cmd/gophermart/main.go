@@ -58,6 +58,10 @@ func main() {
 	userService := services.NewUserService(userStorage, cfg.JWTSecret, cfg.TokenExpiration.String())
 	userHandler := handlers.NewUserHandler(userService)
 
+	orderStorage := storage.NewPostgresOrderStorage(dbPool)
+	orderService := services.NewOrderService(orderStorage)
+	orderHandler := handlers.NewOrderHandler(orderService)
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
@@ -76,6 +80,8 @@ func main() {
 	protected := e.Group("/api/user")
 	protected.Use(auth.JWTMiddleware(cfg.JWTSecret))
 	protected.GET("/balance", userHandler.GetBalance)
+	protected.POST("/orders", orderHandler.SubmitOrder)
+	protected.GET("/orders", orderHandler.GetOrders)
 
 	// Запуск сервера
 	go func() {
