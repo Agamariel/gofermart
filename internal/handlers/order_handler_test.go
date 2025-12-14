@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -14,6 +15,7 @@ import (
 	"github.com/agamariel/gofermart/internal/services"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 )
 
 type mockOrderService struct {
@@ -147,7 +149,7 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 		setupContext   func(c *echo.Context)
 		mockService    *mockOrderService
 		expectedStatus int
-		checkBody      bool
+		validateBody   func(t *testing.T, body string)
 	}{
 		{
 			name: "success list",
@@ -167,7 +169,44 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				},
 			},
 			expectedStatus: http.StatusOK,
-			checkBody:      true,
+			validateBody: func(t *testing.T, body string) {
+				if !strings.Contains(body, "79927398713") {
+					t.Errorf("response body does not contain order number: %s", body)
+				}
+			},
+		},
+		{
+			name: "accrual returned",
+			setupContext: func(c *echo.Context) {
+				(*c).Set(string(auth.UserIDKey), userID)
+			},
+			mockService: &mockOrderService{
+				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.Order, error) {
+					uploadedAt, _ := time.Parse(time.RFC3339, "2025-12-09T15:04:05Z")
+					accrual := decimal.NewFromFloat(729.98)
+					return []*models.Order{
+						{
+							Number:     "2357281120545",
+							Status:     models.OrderStatusProcessed,
+							Accrual:    &accrual,
+							UploadedAt: uploadedAt,
+						},
+					}, nil
+				},
+			},
+			expectedStatus: http.StatusOK,
+			validateBody: func(t *testing.T, body string) {
+				var resp []map[string]interface{}
+				if err := json.Unmarshal([]byte(body), &resp); err != nil {
+					t.Fatalf("failed to unmarshal response: %v", err)
+				}
+				if len(resp) != 1 {
+					t.Fatalf("unexpected response length: %d", len(resp))
+				}
+				if _, ok := resp[0]["accrual"]; !ok {
+					t.Fatalf("accrual field is missing in response: %s", body)
+				}
+			},
 		},
 		{
 			name: "no content",
@@ -180,7 +219,7 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				},
 			},
 			expectedStatus: http.StatusNoContent,
-			checkBody:      false,
+			validateBody:   nil,
 		},
 		{
 			name: "missing user in context",
@@ -189,7 +228,7 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 			},
 			mockService:    &mockOrderService{},
 			expectedStatus: http.StatusUnauthorized,
-			checkBody:      false,
+			validateBody:   nil,
 		},
 		{
 			name: "internal error",
@@ -202,7 +241,7 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				},
 			},
 			expectedStatus: http.StatusInternalServerError,
-			checkBody:      false,
+			validateBody:   nil,
 		},
 	}
 
@@ -236,11 +275,8 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				}
 			}
 
-			if tt.checkBody {
-				body := rec.Body.String()
-				if !strings.Contains(body, "79927398713") {
-					t.Errorf("response body does not contain order number: %s", body)
-				}
+			if tt.validateBody != nil {
+				tt.validateBody(t, rec.Body.String())
 			}
 		})
 	}

@@ -82,9 +82,8 @@ func (h *OrderHandler) mapOrdersToResponse(orders []*models.Order) []*models.Ord
 	for _, order := range orders {
 		var accrualPtr *float64
 		if order.Accrual != nil {
-			if val, ok := order.Accrual.Float64(); ok {
-				accrualPtr = &val
-			}
+			val, _ := order.Accrual.Float64()
+			accrualPtr = &val
 		}
 
 		response = append(response, &models.OrderResponse{
