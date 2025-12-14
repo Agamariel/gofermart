@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/agamariel/gofermart/internal/models"
 	"github.com/agamariel/gofermart/internal/storage"
@@ -22,16 +21,16 @@ var (
 // OrderService определяет интерфейс работы с заказами.
 type OrderService interface {
 	SubmitOrder(ctx context.Context, userID uuid.UUID, orderNumber string) error
-	GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.OrderResponse, error)
+	GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.Order, error)
 }
 
 // OrderServiceImpl реализует OrderService.
 type OrderServiceImpl struct {
-	orderStorage storage.OrderStorage
+	orderStorage OrderStorage
 }
 
 // NewOrderService создаёт новый сервис заказов.
-func NewOrderService(orderStorage storage.OrderStorage) *OrderServiceImpl {
+func NewOrderService(orderStorage OrderStorage) *OrderServiceImpl {
 	return &OrderServiceImpl{orderStorage: orderStorage}
 }
 
@@ -83,34 +82,13 @@ func (s *OrderServiceImpl) SubmitOrder(ctx context.Context, userID uuid.UUID, or
 }
 
 // GetUserOrders возвращает список заказов пользователя.
-func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.OrderResponse, error) {
+func (s *OrderServiceImpl) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.Order, error) {
 	orders, err := s.orderStorage.GetByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get user orders: %w", err)
 	}
 
-	if len(orders) == 0 {
-		return []*models.OrderResponse{}, nil
-	}
-
-	var resp []*models.OrderResponse
-	for _, o := range orders {
-		var accrualPtr *float64
-		if o.Accrual != nil {
-			if val, ok := o.Accrual.Float64(); ok {
-				accrualPtr = &val
-			}
-		}
-
-		resp = append(resp, &models.OrderResponse{
-			Number:     o.Number,
-			Status:     string(o.Status),
-			Accrual:    accrualPtr,
-			UploadedAt: o.UploadedAt.Format(time.RFC3339),
-		})
-	}
-
-	return resp, nil
+	return orders, nil
 }
 
 // normalizeOrderNumber убирает пробелы и переносы.

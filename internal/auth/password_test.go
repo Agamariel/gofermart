@@ -22,9 +22,14 @@ func TestHashPassword(t *testing.T) {
 			wantErr:  false, // bcrypt позволяет пустые пароли
 		},
 		{
-			name:     "long password",
-			password: strings.Repeat("a", 100),
+			name:     "long password (72 bytes - bcrypt limit)",
+			password: strings.Repeat("a", 72),
 			wantErr:  false,
+		},
+		{
+			name:     "too long password (exceeds bcrypt limit)",
+			password: strings.Repeat("a", 100),
+			wantErr:  true,
 		},
 		{
 			name:     "special characters",
@@ -165,14 +170,22 @@ func TestCheckPasswordEdgeCases(t *testing.T) {
 		}
 	})
 
-	t.Run("long password", func(t *testing.T) {
-		longPassword := strings.Repeat("a", 100)
+	t.Run("long password (72 bytes - bcrypt limit)", func(t *testing.T) {
+		longPassword := strings.Repeat("a", 72)
 		hash, err := HashPassword(longPassword)
 		if err != nil {
 			t.Fatalf("HashPassword() error = %v", err)
 		}
 		if !CheckPassword(longPassword, hash) {
 			t.Error("CheckPassword() failed for long password")
+		}
+	})
+
+	t.Run("too long password (exceeds bcrypt limit)", func(t *testing.T) {
+		tooLongPassword := strings.Repeat("a", 100)
+		_, err := HashPassword(tooLongPassword)
+		if err == nil {
+			t.Error("HashPassword() should return error for password exceeding 72 bytes")
 		}
 	})
 

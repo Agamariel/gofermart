@@ -5,6 +5,7 @@ import (
 
 	"github.com/agamariel/gofermart/internal/models"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/shopspring/decimal"
 )
 
@@ -15,6 +16,7 @@ type MockUserStorage struct {
 	GetByIDFunc       func(ctx context.Context, id uuid.UUID) (*models.User, error)
 	UpdateBalanceFunc func(ctx context.Context, id uuid.UUID, amount decimal.Decimal) error
 	WithdrawFunc      func(ctx context.Context, id uuid.UUID, amount decimal.Decimal) error
+	WithdrawTxFunc    func(ctx context.Context, tx pgx.Tx, id uuid.UUID, amount decimal.Decimal) error
 }
 
 func (m *MockUserStorage) Create(ctx context.Context, user *models.User) error {
@@ -48,6 +50,13 @@ func (m *MockUserStorage) UpdateBalance(ctx context.Context, id uuid.UUID, amoun
 func (m *MockUserStorage) Withdraw(ctx context.Context, id uuid.UUID, amount decimal.Decimal) error {
 	if m.WithdrawFunc != nil {
 		return m.WithdrawFunc(ctx, id, amount)
+	}
+	return nil
+}
+
+func (m *MockUserStorage) WithdrawTx(ctx context.Context, tx pgx.Tx, id uuid.UUID, amount decimal.Decimal) error {
+	if m.WithdrawTxFunc != nil {
+		return m.WithdrawTxFunc(ctx, tx, id, amount)
 	}
 	return nil
 }

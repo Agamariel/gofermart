@@ -246,8 +246,9 @@ func TestTokenExpiration(t *testing.T) {
 		Login: "test@example.com",
 	}
 
-	// Создаем токен с очень коротким временем жизни
-	shortExpiration := 500 * time.Millisecond
+	// Создаем токен с коротким временем жизни
+	// Используем 2 секунды, т.к. JWT работает с секундами, не миллисекундами
+	shortExpiration := 2 * time.Second
 	token, err := GenerateToken(user, secret, shortExpiration)
 	if err != nil {
 		t.Fatalf("GenerateToken() error = %v", err)
@@ -260,7 +261,7 @@ func TestTokenExpiration(t *testing.T) {
 	}
 
 	// Ждём истечения (с запасом)
-	time.Sleep(700 * time.Millisecond)
+	time.Sleep(3 * time.Second)
 
 	// Теперь должен быть невалидным
 	_, err = ValidateToken(token, secret)

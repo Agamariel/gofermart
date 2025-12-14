@@ -159,8 +159,9 @@ func TestOrderService_GetUserOrders(t *testing.T) {
 	if resp[0].Number != orders[0].Number {
 		t.Errorf("number mismatch: got %s, want %s", resp[0].Number, orders[0].Number)
 	}
-	if resp[0].Accrual == nil || *resp[0].Accrual != 150.50 {
-		t.Errorf("accrual mismatch: got %v", resp[0].Accrual)
+	expectedAccrual := decimal.NewFromFloat(150.50)
+	if resp[0].Accrual == nil || !resp[0].Accrual.Equal(expectedAccrual) {
+		t.Errorf("accrual mismatch: got %v, want %v", resp[0].Accrual, expectedAccrual)
 	}
 }
 

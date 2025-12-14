@@ -19,15 +19,6 @@ var (
 	ErrOrderAlreadyExists = errors.New("order already exists")
 )
 
-// OrderStorage определяет интерфейс для работы с заказами.
-type OrderStorage interface {
-	Create(ctx context.Context, order *models.Order) error
-	GetByNumber(ctx context.Context, number string) (*models.Order, error)
-	GetByUserID(ctx context.Context, userID uuid.UUID) ([]*models.Order, error)
-	UpdateStatus(ctx context.Context, number string, status models.OrderStatus, accrual *decimal.Decimal) error
-	GetPendingOrders(ctx context.Context) ([]*models.Order, error)
-}
-
 // PostgresOrderStorage реализует OrderStorage для PostgreSQL.
 type PostgresOrderStorage struct {
 	pool *pgxpool.Pool

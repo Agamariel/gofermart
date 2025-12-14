@@ -13,13 +13,14 @@ import (
 	"github.com/agamariel/gofermart/internal/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 )
 
 // MockUserService - мок для тестирования handlers
 type MockUserService struct {
 	RegisterFunc   func(ctx context.Context, login, password string) (*models.User, string, error)
 	LoginFunc      func(ctx context.Context, login, password string) (*models.User, string, error)
-	GetBalanceFunc func(ctx context.Context, userID uuid.UUID) (*models.BalanceResponse, error)
+	GetBalanceFunc func(ctx context.Context, userID uuid.UUID) (*models.User, error)
 }
 
 func (m *MockUserService) Register(ctx context.Context, login, password string) (*models.User, string, error) {
@@ -36,7 +37,7 @@ func (m *MockUserService) Login(ctx context.Context, login, password string) (*m
 	return nil, "", nil
 }
 
-func (m *MockUserService) GetBalance(ctx context.Context, userID uuid.UUID) (*models.BalanceResponse, error) {
+func (m *MockUserService) GetBalance(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	if m.GetBalanceFunc != nil {
 		return m.GetBalanceFunc(ctx, userID)
 	}
@@ -284,10 +285,11 @@ func TestUserHandler_GetBalance(t *testing.T) {
 				(*c).Set("user_id", userID)
 			},
 			mockService: &MockUserService{
-				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.BalanceResponse, error) {
-					return &models.BalanceResponse{
-						Current:   100.50,
-						Withdrawn: 42.00,
+				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.User, error) {
+					return &models.User{
+						ID:        userID,
+						Balance:   decimal.NewFromFloat(100.50),
+						Withdrawn: decimal.NewFromFloat(42.00),
 					}, nil
 				},
 			},
@@ -309,7 +311,7 @@ func TestUserHandler_GetBalance(t *testing.T) {
 				(*c).Set("user_id", userID)
 			},
 			mockService: &MockUserService{
-				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.BalanceResponse, error) {
+				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.User, error) {
 					return nil, storage.ErrUserNotFound
 				},
 			},
@@ -322,7 +324,7 @@ func TestUserHandler_GetBalance(t *testing.T) {
 				(*c).Set("user_id", userID)
 			},
 			mockService: &MockUserService{
-				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.BalanceResponse, error) {
+				GetBalanceFunc: func(ctx context.Context, id uuid.UUID) (*models.User, error) {
 					return nil, errors.New("database error")
 				},
 			},

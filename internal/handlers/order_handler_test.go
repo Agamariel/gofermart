@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/agamariel/gofermart/internal/auth"
 	"github.com/agamariel/gofermart/internal/models"
@@ -17,7 +18,7 @@ import (
 
 type mockOrderService struct {
 	SubmitFunc func(ctx context.Context, userID uuid.UUID, orderNumber string) error
-	ListFunc   func(ctx context.Context, userID uuid.UUID) ([]*models.OrderResponse, error)
+	ListFunc   func(ctx context.Context, userID uuid.UUID) ([]*models.Order, error)
 }
 
 func (m *mockOrderService) SubmitOrder(ctx context.Context, userID uuid.UUID, orderNumber string) error {
@@ -27,11 +28,11 @@ func (m *mockOrderService) SubmitOrder(ctx context.Context, userID uuid.UUID, or
 	return nil
 }
 
-func (m *mockOrderService) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.OrderResponse, error) {
+func (m *mockOrderService) GetUserOrders(ctx context.Context, userID uuid.UUID) ([]*models.Order, error) {
 	if m.ListFunc != nil {
 		return m.ListFunc(ctx, userID)
 	}
-	return []*models.OrderResponse{}, nil
+	return []*models.Order{}, nil
 }
 
 func TestOrderHandler_SubmitOrder(t *testing.T) {
@@ -154,12 +155,13 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				(*c).Set(string(auth.UserIDKey), userID)
 			},
 			mockService: &mockOrderService{
-				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.OrderResponse, error) {
-					return []*models.OrderResponse{
+				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.Order, error) {
+					uploadedAt, _ := time.Parse(time.RFC3339, "2025-12-09T15:04:05Z")
+					return []*models.Order{
 						{
 							Number:     "79927398713",
-							Status:     "NEW",
-							UploadedAt: "2025-12-09T15:04:05Z",
+							Status:     models.OrderStatusNew,
+							UploadedAt: uploadedAt,
 						},
 					}, nil
 				},
@@ -173,8 +175,8 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				(*c).Set(string(auth.UserIDKey), userID)
 			},
 			mockService: &mockOrderService{
-				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.OrderResponse, error) {
-					return []*models.OrderResponse{}, nil
+				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.Order, error) {
+					return []*models.Order{}, nil
 				},
 			},
 			expectedStatus: http.StatusNoContent,
@@ -195,7 +197,7 @@ func TestOrderHandler_GetOrders(t *testing.T) {
 				(*c).Set(string(auth.UserIDKey), userID)
 			},
 			mockService: &mockOrderService{
-				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.OrderResponse, error) {
+				ListFunc: func(ctx context.Context, uid uuid.UUID) ([]*models.Order, error) {
 					return nil, errors.New("db error")
 				},
 			},

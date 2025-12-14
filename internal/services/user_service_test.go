@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/agamariel/gofermart/internal/auth"
 	"github.com/agamariel/gofermart/internal/models"
 	"github.com/agamariel/gofermart/internal/storage"
 	"github.com/google/uuid"
@@ -114,8 +115,11 @@ func TestUserServiceImpl_Login(t *testing.T) {
 	secret := "test-secret"
 	correctPassword := "password123"
 
-	// Создаём хеш для правильного пароля
-	hash := "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy" // bcrypt hash для "password123"
+	// Создаём хеш для правильного пароля с помощью auth.HashPassword
+	hash, err := auth.HashPassword(correctPassword)
+	if err != nil {
+		t.Fatalf("Failed to hash password: %v", err)
+	}
 
 	existingUser := &models.User{
 		ID:           uuid.New(),
@@ -313,11 +317,14 @@ func TestUserServiceImpl_GetBalance(t *testing.T) {
 				t.Fatal("GetBalance() returned nil balance")
 			}
 
-			if balance.Current != tt.wantCurrent {
-				t.Errorf("GetBalance() Current = %v, want %v", balance.Current, tt.wantCurrent)
+			currentBalance, _ := balance.Balance.Float64()
+			withdrawnBalance, _ := balance.Withdrawn.Float64()
+
+			if currentBalance != tt.wantCurrent {
+				t.Errorf("GetBalance() Current = %v, want %v", currentBalance, tt.wantCurrent)
 			}
-			if balance.Withdrawn != tt.wantWithdrawn {
-				t.Errorf("GetBalance() Withdrawn = %v, want %v", balance.Withdrawn, tt.wantWithdrawn)
+			if withdrawnBalance != tt.wantWithdrawn {
+				t.Errorf("GetBalance() Withdrawn = %v, want %v", withdrawnBalance, tt.wantWithdrawn)
 			}
 		})
 	}

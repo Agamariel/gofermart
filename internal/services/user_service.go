@@ -21,18 +21,18 @@ var (
 type UserService interface {
 	Register(ctx context.Context, login, password string) (*models.User, string, error)
 	Login(ctx context.Context, login, password string) (*models.User, string, error)
-	GetBalance(ctx context.Context, userID uuid.UUID) (*models.BalanceResponse, error)
+	GetBalance(ctx context.Context, userID uuid.UUID) (*models.User, error)
 }
 
 // UserServiceImpl реализует UserService.
 type UserServiceImpl struct {
-	userStorage     storage.UserStorage
+	userStorage     UserStorage
 	jwtSecret       string
 	tokenExpiration time.Duration
 }
 
 // NewUserService создаёт новый экземпляр UserService.
-func NewUserService(userStorage storage.UserStorage, jwtSecret string, tokenExpiration time.Duration) *UserServiceImpl {
+func NewUserService(userStorage UserStorage, jwtSecret string, tokenExpiration time.Duration) *UserServiceImpl {
 	return &UserServiceImpl{
 		userStorage:     userStorage,
 		jwtSecret:       jwtSecret,
@@ -100,7 +100,7 @@ func (s *UserServiceImpl) Login(ctx context.Context, login, password string) (*m
 }
 
 // GetBalance возвращает баланс пользователя.
-func (s *UserServiceImpl) GetBalance(ctx context.Context, userID uuid.UUID) (*models.BalanceResponse, error) {
+func (s *UserServiceImpl) GetBalance(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	user, err := s.userStorage.GetByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
@@ -109,14 +109,7 @@ func (s *UserServiceImpl) GetBalance(ctx context.Context, userID uuid.UUID) (*mo
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// Конвертация decimal в float64
-	current, _ := user.Balance.Float64()
-	withdrawn, _ := user.Withdrawn.Float64()
-
-	return &models.BalanceResponse{
-		Current:   current,
-		Withdrawn: withdrawn,
-	}, nil
+	return user, nil
 }
 
 // generateToken генерирует JWT токен для пользователя.

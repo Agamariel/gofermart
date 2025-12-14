@@ -96,7 +96,7 @@ func (h *UserHandler) GetBalance(c echo.Context) error {
 	}
 
 	// Получение баланса
-	balance, err := h.userService.GetBalance(c.Request().Context(), userID)
+	user, err := h.userService.GetBalance(c.Request().Context(), userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			return echo.NewHTTPError(http.StatusUnauthorized, "user not found")
@@ -105,7 +105,9 @@ func (h *UserHandler) GetBalance(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 
-	return c.JSON(http.StatusOK, balance)
+	// Маппинг domain модели в DTO
+	response := h.mapUserToBalanceResponse(user)
+	return c.JSON(http.StatusOK, response)
 }
 
 // setAuthToken устанавливает токен в cookie и заголовок ответа.
@@ -123,4 +125,15 @@ func setAuthToken(c echo.Context, token string) {
 
 	// Также устанавливаем в заголовок для удобства
 	c.Response().Header().Set("Authorization", "Bearer "+token)
+}
+
+// mapUserToBalanceResponse преобразует domain модель пользователя в DTO баланса.
+func (h *UserHandler) mapUserToBalanceResponse(user *models.User) *models.BalanceResponse {
+	current, _ := user.Balance.Float64()
+	withdrawn, _ := user.Withdrawn.Float64()
+
+	return &models.BalanceResponse{
+		Current:   current,
+		Withdrawn: withdrawn,
+	}
 }

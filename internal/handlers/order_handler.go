@@ -5,8 +5,10 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/agamariel/gofermart/internal/auth"
+	"github.com/agamariel/gofermart/internal/models"
 	"github.com/agamariel/gofermart/internal/services"
 	"github.com/labstack/echo/v4"
 )
@@ -69,5 +71,28 @@ func (h *OrderHandler) GetOrders(c echo.Context) error {
 		return c.NoContent(http.StatusNoContent)
 	}
 
-	return c.JSON(http.StatusOK, orders)
+	// Маппинг domain моделей в DTO
+	response := h.mapOrdersToResponse(orders)
+	return c.JSON(http.StatusOK, response)
+}
+
+// mapOrdersToResponse преобразует domain модели заказов в DTO для HTTP-ответа.
+func (h *OrderHandler) mapOrdersToResponse(orders []*models.Order) []*models.OrderResponse {
+	var response []*models.OrderResponse
+	for _, order := range orders {
+		var accrualPtr *float64
+		if order.Accrual != nil {
+			if val, ok := order.Accrual.Float64(); ok {
+				accrualPtr = &val
+			}
+		}
+
+		response = append(response, &models.OrderResponse{
+			Number:     order.Number,
+			Status:     string(order.Status),
+			Accrual:    accrualPtr,
+			UploadedAt: order.UploadedAt.Format(time.RFC3339),
+		})
+	}
+	return response
 }

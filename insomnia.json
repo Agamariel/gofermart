@@ -161,6 +161,71 @@
 			"_type": "request"
 		},
 		{
+			"_id": "req_withdraw_balance",
+			"parentId": "fld_user_protected",
+			"modified": 1702082000000,
+			"created": 1702082000000,
+			"url": "{{ _.base_url }}/api/user/balance/withdraw",
+			"name": "Withdraw Balance",
+			"description": "Списание баллов на номер заказа. JWT обязателен.\nКоды ответов: 200 (успех), 401, 402 (недостаточно средств), 422 (Луна/сумма), 500.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"order\": \"79927398713\",\n  \"sum\": 150.75\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				},
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}",
+					"description": "Опционально, если не используете cookie"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702077300000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_get_withdrawals",
+			"parentId": "fld_user_protected",
+			"modified": 1702082000000,
+			"created": 1702082000000,
+			"url": "{{ _.base_url }}/api/user/withdrawals",
+			"name": "Get Withdrawals",
+			"description": "История списаний пользователя. Коды: 200 / 204 / 401 / 500.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}",
+					"description": "Опционально, если не используете cookie"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1702077200000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
 			"_id": "fld_user_auth",
 			"parentId": "wrk_gofermart",
 			"modified": 1702080000000,

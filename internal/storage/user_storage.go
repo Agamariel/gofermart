@@ -19,15 +19,6 @@ var (
 	ErrInsufficientBalance = errors.New("insufficient balance")
 )
 
-// UserStorage определяет интерфейс для работы с пользователями.
-type UserStorage interface {
-	Create(ctx context.Context, user *models.User) error
-	GetByLogin(ctx context.Context, login string) (*models.User, error)
-	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
-	UpdateBalance(ctx context.Context, id uuid.UUID, amount decimal.Decimal) error
-	Withdraw(ctx context.Context, id uuid.UUID, amount decimal.Decimal) error
-}
-
 // PostgresUserStorage реализует UserStorage для PostgreSQL.
 type PostgresUserStorage struct {
 	pool *pgxpool.Pool
@@ -165,10 +156,23 @@ func (s *PostgresUserStorage) Withdraw(ctx context.Context, id uuid.UUID, amount
 	}
 	defer tx.Rollback(ctx)
 
+	if err := s.WithdrawTx(ctx, tx, id, amount); err != nil {
+		return err
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// WithdrawTx списывает средства в рамках переданной транзакции.
+func (s *PostgresUserStorage) WithdrawTx(ctx context.Context, tx pgx.Tx, id uuid.UUID, amount decimal.Decimal) error {
 	// Проверяем текущий баланс
 	var currentBalance decimal.Decimal
 	checkQuery := `SELECT balance FROM users WHERE id = $1 FOR UPDATE`
-	err = tx.QueryRow(ctx, checkQuery, id).Scan(&currentBalance)
+	err := tx.QueryRow(ctx, checkQuery, id).Scan(&currentBalance)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrUserNotFound
@@ -190,10 +194,6 @@ func (s *PostgresUserStorage) Withdraw(ctx context.Context, id uuid.UUID, amount
 	_, err = tx.Exec(ctx, updateQuery, amount, id)
 	if err != nil {
 		return fmt.Errorf("failed to withdraw: %w", err)
-	}
-
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
