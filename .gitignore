@@ -11,13 +11,47 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Binaries
-cmd/gophermart/main
-cmd/gophermart/gophermart
+# Go workspace file
+go.work
 
-# Dependency directories (remove the comment below to include it)
+# Dependency directories
 vendor/
 
-# IDEs directories
-.idea
-.vscode
+# IDEs
+.vscode/
+.idea/
+.*/
+!.github/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Build output
+/gophermart
+/cmd/gophermart/gophermart
+/bin/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage
+coverage.html
+coverage.out
+coverage.txt
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
